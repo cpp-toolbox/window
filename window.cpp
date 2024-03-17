@@ -15,15 +15,16 @@
  * \author cuppajoeman
  * \date created: 2024-02-25, edited: 2024-02-26
  */
-std::optional<GLFWwindow *> initialize_glfw_and_return_window(const unsigned int screen_width, const unsigned int screen_height) {
+std::optional<GLFWwindow *>
+initialize_glfw_and_return_window(const unsigned int screen_width, const unsigned int screen_height) {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     // glfw window creation
-    GLFWwindow *window = glfwCreateWindow(screen_width, screen_height, "mwe font rendering", NULL, NULL);
-    if (window == NULL) {
+    GLFWwindow *window = glfwCreateWindow(screen_width, screen_height, "mwe", nullptr, nullptr);
+    if (window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         return std::nullopt;
