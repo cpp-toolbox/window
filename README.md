@@ -6,6 +6,7 @@ A glfw window
 
 * [glfw](https://github.com/glfw/glfw)
 * [glad3.3](https://github.com/opengl-toolbox/glad_opengl_3.3_core)
+* [input snapshot](https://github.com/opengl-toolbox/input_snapshot) - stores the state of mouse and keyboard used in the key and mouse callbacks
 
 # CMake
 
