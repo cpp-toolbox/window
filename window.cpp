@@ -8,6 +8,8 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 static void on_window_size_change(GLFWwindow *window, int width, int height);
 static void error_callback(int error, const char *description);
 
+static bool cursor_is_grabbed = false;
+
 /**
  * \brief make a glfw window
  *
@@ -26,8 +28,8 @@ static void error_callback(int error, const char *description);
  * \date created: 2024-02-25, edited: 2024-02-26
  */
 GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int *window_width_px, unsigned int *window_height_px,
-                                                   const char *window_name, bool start_in_fullscreen,
-                                                   InputSnapshot *input_snapshot_ptr) {
+                                                   const char *window_name, bool start_in_fullscreen, bool vsync,
+                                                   LiveInputState *input_snapshot_ptr) {
 
     glfwSetErrorCallback(error_callback);
 
@@ -68,6 +70,10 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int *window_width_px
     // disable this for debugging so you can move the mouse outside the window
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    int vsync_int = vsync;
+
+    glfwSwapInterval(vsync_int);
+
     if (glfwRawMouseMotionSupported()) {
         // logger.info("raw mouse motion supported, using it");
         glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
@@ -83,6 +89,15 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int *window_width_px
 
 static void error_callback(int error, const char *description) { fprintf(stderr, "Error: %s\n", description); }
 
+void toggle_mouse_mode(GLFWwindow *window) {
+    if (cursor_is_grabbed) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    } else {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+    cursor_is_grabbed = !cursor_is_grabbed;
+}
+
 /**
  * \brief whenever a key is pressed update the input snapshot which is created
  * in main() { ...
@@ -94,7 +109,7 @@ static void error_callback(int error, const char *description) { fprintf(stderr,
  */
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     // TODO figure out how to do mappings of key to function to simplify
-    InputSnapshot *input_snapshot = static_cast<InputSnapshot *>(glfwGetWindowUserPointer(window));
+    LiveInputState *input_snapshot = static_cast<LiveInputState *>(glfwGetWindowUserPointer(window));
     if (key == GLFW_KEY_Q) {
         if (action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -132,11 +147,15 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
         } else if (action == GLFW_RELEASE) {
             input_snapshot->jump_pressed = false;
         }
+    } else if (key == GLFW_KEY_M) {
+        if (action == GLFW_PRESS || action == GLFW_RELEASE) {
+            toggle_mouse_mode(window);
+        }
     }
 }
 
 void mouse_move_callback(GLFWwindow *window, double mouse_position_x, double mouse_position_y) {
-    InputSnapshot *input_snapshot = static_cast<InputSnapshot *>(glfwGetWindowUserPointer(window));
+    LiveInputState *input_snapshot = static_cast<LiveInputState *>(glfwGetWindowUserPointer(window));
     input_snapshot->mouse_position_x = mouse_position_x;
     input_snapshot->mouse_position_y = mouse_position_y;
 }
