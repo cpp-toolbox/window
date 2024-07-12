@@ -117,7 +117,7 @@ void toggle_mouse_mode(GLFWwindow *window) {
  */
 static void key_callback(GLFWwindow *window, int key, int scancode, int action, int mods) {
     // TODO figure out how to do mappings of key to function to simplify
-    LiveInputState *input_snapshot = static_cast<LiveInputState *>(glfwGetWindowUserPointer(window));
+    auto *input_snapshot = static_cast<LiveInputState *>(glfwGetWindowUserPointer(window));
     if (key == GLFW_KEY_Q) {
         if (action == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, GLFW_TRUE);
@@ -164,7 +164,7 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
 }
 
 void mouse_move_callback(GLFWwindow *window, double mouse_position_x, double mouse_position_y) {
-    LiveInputState *input_snapshot = static_cast<LiveInputState *>(glfwGetWindowUserPointer(window));
+    auto *input_snapshot = static_cast<LiveInputState *>(glfwGetWindowUserPointer(window));
     input_snapshot->mouse_position_x = mouse_position_x;
     input_snapshot->mouse_position_y = mouse_position_y;
 }
