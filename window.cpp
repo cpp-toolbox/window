@@ -16,19 +16,17 @@ static bool cursor_is_grabbed = false;
  * \details create a glfw window for opengl3.3 core and load in opengl function
  * pointers (implementation)
  *
- * \note this doesn't register any window callbacks, you have to do that
- * yourself.
- *
  * \param screen_width the requested screen height
  * \param screen_height the requested screen width
- * \return an optional window, based on whethe or not initialization was
+ * \return an optional window, based on whether or not initialization was
  * successful
  *
  * \author cuppajoeman
- * \date created: 2024-02-25, edited: 2024-02-26
+ * \date created: 2024-02-25, edited: 2024-07-11
  */
 GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int *window_width_px, unsigned int *window_height_px,
-                                                   const char *window_name, bool start_in_fullscreen, bool vsync,
+                                                   const char *window_name, bool start_in_fullscreen,
+                                                   bool start_with_mouse_captured, bool vsync,
                                                    LiveInputState *input_snapshot_ptr) {
 
     glfwSetErrorCallback(error_callback);
@@ -62,13 +60,23 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int *window_width_px
 
     // glad: load all OpenGL function pointers, note that opengl will not work
     // until the next line gets called.
-    if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress)) {
+
+    // glad2
+    // if (!gladLoadGL((GLADloadfunc)glfwGetProcAddress)) {
+    //     std::cout << "Failed to initialize GLAD" << std::endl;
+    //     throw std::runtime_error("failed to initialize GLAD");
+    // }
+
+    // glad1
+    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         throw std::runtime_error("failed to initialize GLAD");
     }
 
     // disable this for debugging so you can move the mouse outside the window
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    if (start_with_mouse_captured) {
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
 
     int vsync_int = vsync;
 
@@ -148,7 +156,8 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
             input_snapshot->jump_pressed = false;
         }
     } else if (key == GLFW_KEY_M) {
-        if (action == GLFW_PRESS || action == GLFW_RELEASE) {
+        bool mouse_toggle_just_pressed = (!cursor_is_grabbed and action == GLFW_PRESS) or (cursor_is_grabbed and action == GLFW_PRESS);
+        if (mouse_toggle_just_pressed) {
             toggle_mouse_mode(window);
         }
     }
