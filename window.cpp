@@ -78,6 +78,12 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int *window_width_px
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
+    bool rendering_3d_graphics = true;
+
+    if (rendering_3d_graphics) {
+        glEnable(GL_DEPTH_TEST); // configure global opengl state
+    }
+
     int vsync_int = vsync;
 
     glfwSwapInterval(vsync_int);
@@ -156,7 +162,8 @@ static void key_callback(GLFWwindow *window, int key, int scancode, int action, 
             input_snapshot->jump_pressed = false;
         }
     } else if (key == GLFW_KEY_M) {
-        bool mouse_toggle_just_pressed = (!cursor_is_grabbed and action == GLFW_PRESS) or (cursor_is_grabbed and action == GLFW_PRESS);
+        bool mouse_toggle_just_pressed =
+            (!cursor_is_grabbed and action == GLFW_PRESS) or (cursor_is_grabbed and action == GLFW_PRESS);
         if (mouse_toggle_just_pressed) {
             toggle_mouse_mode(window);
         }
