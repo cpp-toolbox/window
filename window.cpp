@@ -93,9 +93,9 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int *window_width_px
         glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
 
-    glfwSetWindowUserPointer(window, input_snapshot_ptr);
-    glfwSetKeyCallback(window, key_callback);
-    glfwSetCursorPosCallback(window, mouse_move_callback);
+    //    glfwSetWindowUserPointer(window, input_snapshot_ptr);
+    //    glfwSetKeyCallback(window, key_callback);
+    //    glfwSetCursorPosCallback(window, mouse_move_callback);
     glfwSetFramebufferSizeCallback(window, on_window_size_change);
 
     return window;
