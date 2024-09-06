@@ -7,6 +7,7 @@ struct LiveInputState {
   bool forward_pressed = false;
   bool backward_pressed = false;
   bool jump_pressed = false;
+  bool fire_pressed = false;
   double mouse_position_x = 0.0, mouse_position_y = 0.0;
 };
 
