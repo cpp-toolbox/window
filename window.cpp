@@ -22,10 +22,9 @@ static bool cursor_is_grabbed = false;
  * \author cuppajoeman
  * \date created: 2024-02-25, edited: 2024-07-11
  */
-GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int *window_width_px, unsigned int *window_height_px,
+GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px, unsigned int &window_height_px,
                                                    const char *window_name, bool start_in_fullscreen,
-                                                   bool start_with_mouse_captured, bool vsync,
-                                                   LiveInputState *input_snapshot_ptr) {
+                                                   bool start_with_mouse_captured, bool vsync) {
 
     glfwSetErrorCallback(error_callback);
 
@@ -41,11 +40,11 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int *window_width_px
     if (start_in_fullscreen) {
         GLFWmonitor *monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-        *window_width_px = mode->width;
-        *window_height_px = mode->height;
-        window = glfwCreateWindow(*window_width_px, *window_height_px, window_name, monitor, NULL);
+        window_width_px = mode->width;
+        window_height_px = mode->height;
+        window = glfwCreateWindow(window_width_px, window_height_px, window_name, monitor, NULL);
     } else {
-        window = glfwCreateWindow(*window_width_px, *window_height_px, window_name, NULL, NULL);
+        window = glfwCreateWindow(window_width_px, window_height_px, window_name, NULL, NULL);
     }
 
     if (window == nullptr) {
