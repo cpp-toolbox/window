@@ -24,7 +24,8 @@ static bool cursor_is_grabbed = false;
  */
 GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px, unsigned int &window_height_px,
                                                    const char *window_name, bool start_in_fullscreen,
-                                                   bool start_with_mouse_captured, bool vsync) {
+                                                   bool start_with_mouse_captured, bool vsync,
+                                                   bool print_out_opengl_data) {
 
     glfwSetErrorCallback(error_callback);
 
@@ -70,6 +71,10 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px
         throw std::runtime_error("failed to initialize GLAD");
     }
 
+    if (print_out_opengl_data) {
+        print_opengl_info();
+    }
+
     // disable this for debugging so you can move the mouse outside the window
     if (start_with_mouse_captured) {
         glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -94,6 +99,117 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px
     glfwSetFramebufferSizeCallback(window, on_window_size_change);
 
     return window;
+}
+
+void print_opengl_info() {
+    // Get OpenGL version and renderer info
+    const char *version = (const char *)glGetString(GL_VERSION);
+    const char *vendor = (const char *)glGetString(GL_VENDOR);
+    const char *renderer = (const char *)glGetString(GL_RENDERER);
+    const char *glslVersion = (const char *)glGetString(GL_SHADING_LANGUAGE_VERSION);
+
+    // Print OpenGL version and hardware details
+    std::cout << "==== OpenGL Information ====" << std::endl;
+    std::cout << "OpenGL Version: " << version << std::endl;
+    std::cout << "Vendor: " << vendor << std::endl;
+    std::cout << "Renderer: " << renderer << std::endl;
+    std::cout << "GLSL Version: " << glslVersion << std::endl;
+    std::cout << std::endl;
+
+    // GPU Resource Limits
+    std::cout << "==== GPU Resource Limits ====" << std::endl;
+
+    GLint maxVertexUniformBlocks = 0;
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &maxVertexUniformBlocks);
+    std::cout << "Maximum vertex uniform blocks: " << maxVertexUniformBlocks << std::endl;
+
+    GLint maxGeometryUniformBlocks = 0;
+    glGetIntegerv(GL_MAX_GEOMETRY_UNIFORM_BLOCKS, &maxGeometryUniformBlocks);
+    std::cout << "Maximum geometry uniform blocks: " << maxGeometryUniformBlocks << std::endl;
+
+    GLint maxFragmentUniformBlocks = 0;
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_BLOCKS, &maxFragmentUniformBlocks);
+    std::cout << "Maximum fragment uniform blocks: " << maxFragmentUniformBlocks << std::endl;
+
+    GLint maxCombinedUniformBlocks = 0;
+    glGetIntegerv(GL_MAX_COMBINED_UNIFORM_BLOCKS, &maxCombinedUniformBlocks);
+    std::cout << "Maximum combined uniform blocks: " << maxCombinedUniformBlocks << std::endl;
+
+    GLint maxUniformBlockSize = 0;
+    glGetIntegerv(GL_MAX_UNIFORM_BLOCK_SIZE, &maxUniformBlockSize);
+    std::cout << "Maximum uniform block size: " << maxUniformBlockSize << " bytes" << std::endl;
+
+    GLint maxUniformBufferBindings = 0;
+    glGetIntegerv(GL_MAX_UNIFORM_BUFFER_BINDINGS, &maxUniformBufferBindings);
+    std::cout << "Maximum uniform buffer bindings: " << maxUniformBufferBindings << std::endl;
+
+    GLint maxTextureSize = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+    std::cout << "Maximum texture size: " << maxTextureSize << "x" << maxTextureSize << " pixels" << std::endl;
+
+    GLint maxVertexAttributes = 0;
+    glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertexAttributes);
+    std::cout << "Maximum number of vertex attributes: " << maxVertexAttributes << std::endl;
+
+    GLint maxVaryingFloats = 0;
+    glGetIntegerv(GL_MAX_VARYING_FLOATS, &maxVaryingFloats);
+    std::cout << "Maximum number of varying floats: " << maxVaryingFloats << std::endl;
+
+    GLint maxVertexUniformComponents = 0;
+    glGetIntegerv(GL_MAX_COMBINED_VERTEX_UNIFORM_COMPONENTS, &maxVertexUniformComponents);
+    std::cout << "Maximum combined vertex uniform components: " << maxVertexUniformComponents << std::endl;
+
+    GLint maxGeometryUniformComponents = 0;
+    glGetIntegerv(GL_MAX_COMBINED_GEOMETRY_UNIFORM_COMPONENTS, &maxGeometryUniformComponents);
+    std::cout << "Maximum combined geometry uniform components: " << maxGeometryUniformComponents << std::endl;
+
+    GLint maxFragmentUniformComponents = 0;
+    glGetIntegerv(GL_MAX_COMBINED_FRAGMENT_UNIFORM_COMPONENTS, &maxFragmentUniformComponents);
+    std::cout << "Maximum combined fragment uniform components: " << maxFragmentUniformComponents << std::endl;
+    std::cout << std::endl;
+
+    // Additional OpenGL capabilities
+    std::cout << "==== OpenGL Additional Capabilities ====" << std::endl;
+
+    GLint maxTextureUnits = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_IMAGE_UNITS, &maxTextureUnits);
+    std::cout << "Maximum texture units: " << maxTextureUnits << std::endl;
+
+    GLint maxTextureLodBias = 0;
+    glGetIntegerv(GL_MAX_TEXTURE_LOD_BIAS, &maxTextureLodBias);
+    std::cout << "Maximum texture LOD bias: " << maxTextureLodBias << std::endl;
+
+    GLint maxRenderbufferSize = 0;
+    glGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &maxRenderbufferSize);
+    std::cout << "Maximum renderbuffer size: " << maxRenderbufferSize << "x" << maxRenderbufferSize << " pixels"
+              << std::endl;
+
+    GLint maxDrawBuffers = 0;
+    glGetIntegerv(GL_MAX_DRAW_BUFFERS, &maxDrawBuffers);
+    std::cout << "Maximum number of draw buffers: " << maxDrawBuffers << std::endl;
+
+    GLint maxColorAttachments = 0;
+    glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &maxColorAttachments);
+    std::cout << "Maximum number of color attachments: " << maxColorAttachments << std::endl;
+
+    GLint maxSampleMaskWords = 0;
+    glGetIntegerv(GL_MAX_SAMPLE_MASK_WORDS, &maxSampleMaskWords);
+    std::cout << "Maximum sample mask words: " << maxSampleMaskWords << std::endl;
+
+    GLint maxTransformFeedbackInterleavedComponents = 0;
+    glGetIntegerv(GL_MAX_TRANSFORM_FEEDBACK_INTERLEAVED_COMPONENTS, &maxTransformFeedbackInterleavedComponents);
+    std::cout << "Maximum transform feedback interleaved components: " << maxTransformFeedbackInterleavedComponents
+              << std::endl;
+
+    // OpenGL Extensions
+    std::cout << "==== OpenGL Extensions ====" << std::endl;
+    GLint numExtensions = 0;
+    glGetIntegerv(GL_NUM_EXTENSIONS, &numExtensions);
+    for (GLint i = 0; i < numExtensions; ++i) {
+        const char *extension = (const char *)glGetStringi(GL_EXTENSIONS, i);
+        std::cout << extension << std::endl;
+    }
+    std::cout << std::endl;
 }
 
 static void error_callback(int error, const char *description) { fprintf(stderr, "Error: %s\n", description); }
