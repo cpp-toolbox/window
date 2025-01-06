@@ -13,4 +13,6 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px
 
 void print_opengl_info();
 
+void toggle_mouse_mode(GLFWwindow *window);
+
 #endif // WINDOW_HPP
