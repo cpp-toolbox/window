@@ -19,8 +19,6 @@ static bool cursor_is_grabbed = false;
  * \return an optional window, based on whether or not initialization was
  * successful
  *
- * \author cuppajoeman
- * \date created: 2024-02-25, edited: 2024-07-11
  */
 GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px, unsigned int &window_height_px,
                                                    const char *window_name, bool start_in_fullscreen,
@@ -118,6 +116,12 @@ void print_opengl_info() {
 
     // GPU Resource Limits
     std::cout << "==== GPU Resource Limits ====" << std::endl;
+
+    int max_vertex_uniforms, max_fragment_uniforms;
+    glGetIntegerv(GL_MAX_VERTEX_UNIFORM_COMPONENTS, &max_vertex_uniforms);
+    glGetIntegerv(GL_MAX_FRAGMENT_UNIFORM_COMPONENTS, &max_fragment_uniforms);
+    std::cout << "Max Vertex Uniforms: " << max_vertex_uniforms << std::endl;
+    std::cout << "Max Fragment Uniforms: " << max_fragment_uniforms << std::endl;
 
     GLint maxVertexUniformBlocks = 0;
     glGetIntegerv(GL_MAX_VERTEX_UNIFORM_BLOCKS, &maxVertexUniformBlocks);
