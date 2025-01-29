@@ -6,8 +6,6 @@
 static void on_window_size_change(GLFWwindow *window, int width, int height);
 static void error_callback(int error, const char *description);
 
-static bool cursor_is_grabbed = false;
-
 /**
  * \brief make a glfw window
  *
@@ -20,10 +18,12 @@ static bool cursor_is_grabbed = false;
  * successful
  *
  */
-GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px, unsigned int &window_height_px,
-                                                   const char *window_name, bool start_in_fullscreen,
-                                                   bool start_with_mouse_captured, bool vsync,
-                                                   bool print_out_opengl_data) {
+GLFWwindow *Window::initialize_glfw_glad_and_return_window(unsigned int &window_width_px,
+                                                           unsigned int &window_height_px, const char *window_name,
+                                                           bool start_in_fullscreen, bool start_with_mouse_captured,
+                                                           bool vsync, bool print_out_opengl_data) {
+
+    cursor_is_grabbed = start_with_mouse_captured;
 
     glfwSetErrorCallback(error_callback);
 
@@ -34,25 +34,23 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    GLFWwindow *window;
-
     if (start_in_fullscreen) {
         GLFWmonitor *monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode *mode = glfwGetVideoMode(monitor);
         window_width_px = mode->width;
         window_height_px = mode->height;
-        window = glfwCreateWindow(window_width_px, window_height_px, window_name, monitor, NULL);
+        glfw_window = glfwCreateWindow(window_width_px, window_height_px, window_name, monitor, NULL);
     } else {
-        window = glfwCreateWindow(window_width_px, window_height_px, window_name, NULL, NULL);
+        glfw_window = glfwCreateWindow(window_width_px, window_height_px, window_name, NULL, NULL);
     }
 
-    if (window == nullptr) {
+    if (glfw_window == nullptr) {
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         throw std::runtime_error("failed to create window");
     }
 
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(glfw_window);
 
     // glad: load all OpenGL function pointers, note that opengl will not work
     // until the next line gets called.
@@ -75,7 +73,7 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px
 
     // disable this for debugging so you can move the mouse outside the window
     if (start_with_mouse_captured) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     bool rendering_3d_graphics = true;
@@ -90,16 +88,16 @@ GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px
 
     if (glfwRawMouseMotionSupported()) {
         // logger.info("raw mouse motion supported, using it");
-        glfwSetInputMode(window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
+        glfwSetInputMode(glfw_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
 
     // NOTE for the other callbacks you have to set them yourself.
-    glfwSetFramebufferSizeCallback(window, on_window_size_change);
+    glfwSetFramebufferSizeCallback(glfw_window, on_window_size_change);
 
-    return window;
+    return glfw_window;
 }
 
-void print_opengl_info() {
+void Window::print_opengl_info() {
     // Get OpenGL version and renderer info
     const char *version = (const char *)glGetString(GL_VERSION);
     const char *vendor = (const char *)glGetString(GL_VENDOR);
@@ -218,11 +216,11 @@ void print_opengl_info() {
 
 static void error_callback(int error, const char *description) { fprintf(stderr, "Error: %s\n", description); }
 
-void toggle_mouse_mode(GLFWwindow *window) {
+void Window::toggle_mouse_mode() {
     if (cursor_is_grabbed) {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+        glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     } else {
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
     cursor_is_grabbed = !cursor_is_grabbed;
 }
