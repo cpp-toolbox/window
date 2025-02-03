@@ -14,6 +14,7 @@ class Window {
     GLFWwindow *glfw_window;
     void print_opengl_info();
     void toggle_mouse_mode();
+    void toggle_fullscreen();
     bool cursor_is_grabbed = false;
     bool window_in_fullscreen = false;
 };

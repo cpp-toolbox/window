@@ -225,6 +225,27 @@ void Window::toggle_mouse_mode() {
     cursor_is_grabbed = !cursor_is_grabbed;
 }
 
+void Window::toggle_fullscreen() {
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+    // Get the current window's position and size
+    int window_x, window_y, window_width, window_height;
+    glfwGetWindowPos(glfw_window, &window_x, &window_y);
+    glfwGetWindowSize(glfw_window, &window_width, &window_height);
+
+    if (window_in_fullscreen) {
+        // If the window is currently fullscreen, switch to windowed mode
+        glfwSetWindowMonitor(glfw_window, nullptr, window_x, window_y, window_width, window_height, 0);
+    } else {
+        // If the window is not fullscreen, switch to fullscreen mode
+        // Use the monitor's native resolution (as given by the GLFWvidmode)
+        glfwSetWindowMonitor(glfw_window, monitor, 0, 0, mode->width, mode->height, mode->refreshRate);
+    }
+
+    window_in_fullscreen = !window_in_fullscreen; // Toggle fullscreen state
+}
+
 // glfw: whenever the window size changed (by OS or user resize) this callback
 // function executes
 void on_window_size_change(GLFWwindow *window, int width, int height) {
