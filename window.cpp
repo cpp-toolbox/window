@@ -3,7 +3,6 @@
 #include <ostream>
 #include <stdexcept>
 
-static void on_window_size_change(GLFWwindow *window, int width, int height);
 static void error_callback(int error, const char *description);
 
 /**
@@ -90,9 +89,6 @@ GLFWwindow *Window::initialize_glfw_glad_and_return_window(unsigned int &window_
         // logger.info("raw mouse motion supported, using it");
         glfwSetInputMode(glfw_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
-
-    // NOTE for the other callbacks you have to set them yourself.
-    glfwSetFramebufferSizeCallback(glfw_window, on_window_size_change);
 
     return glfw_window;
 }
@@ -244,12 +240,4 @@ void Window::toggle_fullscreen() {
     }
 
     window_in_fullscreen = !window_in_fullscreen; // Toggle fullscreen state
-}
-
-// glfw: whenever the window size changed (by OS or user resize) this callback
-// function executes
-void on_window_size_change(GLFWwindow *window, int width, int height) {
-    // make sure the viewport matches the new window dimensions; note that width
-    // and height will be significantly larger than specified on retina displays.
-    glViewport(0, 0, width, height);
 }
