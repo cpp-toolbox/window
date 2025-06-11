@@ -5,22 +5,9 @@
 
 static void error_callback(int error, const char *description);
 
-/**
- * \brief make a glfw window
- *
- * \details create a glfw window for opengl3.3 core and load in opengl function
- * pointers (implementation)
- *
- * \param screen_width the requested screen height
- * \param screen_height the requested screen width
- * \return an optional window, based on whether or not initialization was
- * successful
- *
- */
-GLFWwindow *Window::initialize_glfw_glad_and_return_window(unsigned int &window_width_px,
-                                                           unsigned int &window_height_px, const char *window_name,
-                                                           bool start_in_fullscreen, bool start_with_mouse_captured,
-                                                           bool vsync, bool print_out_opengl_data) {
+Window::Window(unsigned int width_px, unsigned int height_px, const char *window_name, bool start_in_fullscreen,
+               bool start_with_mouse_captured, bool vsync, bool print_out_opengl_data)
+    : width_px(width_px), height_px(height_px) {
 
     cursor_is_grabbed = start_with_mouse_captured;
 
@@ -36,11 +23,11 @@ GLFWwindow *Window::initialize_glfw_glad_and_return_window(unsigned int &window_
     if (start_in_fullscreen) {
         GLFWmonitor *monitor = glfwGetPrimaryMonitor();
         const GLFWvidmode *mode = glfwGetVideoMode(monitor);
-        window_width_px = mode->width;
-        window_height_px = mode->height;
-        glfw_window = glfwCreateWindow(window_width_px, window_height_px, window_name, monitor, NULL);
+        width_px = mode->width;
+        height_px = mode->height;
+        glfw_window = glfwCreateWindow(width_px, height_px, window_name, monitor, NULL);
     } else {
-        glfw_window = glfwCreateWindow(window_width_px, window_height_px, window_name, NULL, NULL);
+        glfw_window = glfwCreateWindow(width_px, height_px, window_name, NULL, NULL);
     }
 
     if (glfw_window == nullptr) {
@@ -89,9 +76,29 @@ GLFWwindow *Window::initialize_glfw_glad_and_return_window(unsigned int &window_
         // logger.info("raw mouse motion supported, using it");
         glfwSetInputMode(glfw_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
-
-    return glfw_window;
 }
+
+// the window manges the glfw lifetime, also since we initialize window first before operating with opengl it is
+// destructed last so that all other operations will not fail during program close
+Window::~Window() {
+    if (glfw_window)
+        glfwDestroyWindow(glfw_window);
+
+    glfwTerminate();
+}
+
+/**
+ * \brief make a glfw window
+ *
+ * \details create a glfw window for opengl3.3 core and load in opengl function
+ * pointers (implementation)
+ *
+ * \param screen_width the requested screen height
+ * \param screen_height the requested screen width
+ * \return an optional window, based on whether or not initialization was
+ * successful
+ *
+ */
 
 void Window::print_opengl_info() {
     // Get OpenGL version and renderer info

@@ -6,11 +6,10 @@
 
 class Window {
   public:
-    GLFWwindow *initialize_glfw_glad_and_return_window(unsigned int &window_width_px, unsigned int &window_height_px,
-                                                       const char *window_name, bool start_in_fullscreen,
-                                                       bool start_with_mouse_captured, bool vsync,
-                                                       bool print_out_opengl_data = false);
-
+    unsigned int width_px, height_px;
+    Window(unsigned int width_px, unsigned int height_px, const char *window_name, bool start_in_fullscreen = false,
+           bool start_with_mouse_captured = false, bool vsync = false, bool print_out_opengl_data = false);
+    ~Window();
     GLFWwindow *glfw_window;
     void print_opengl_info();
     void toggle_mouse_mode();
