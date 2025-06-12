@@ -7,8 +7,9 @@
 class Window {
   public:
     unsigned int width_px, height_px;
-    Window(unsigned int width_px, unsigned int height_px, const char *window_name, bool start_in_fullscreen = false,
-           bool start_with_mouse_captured = false, bool vsync = false, bool print_out_opengl_data = false);
+    Window(unsigned int width_px = 700, unsigned int height_px = 700, const char *window_name = "my program",
+           bool start_in_fullscreen = false, bool start_with_mouse_captured = false, bool vsync = false,
+           bool print_out_opengl_data = false);
     ~Window();
     GLFWwindow *glfw_window;
     void print_opengl_info();
