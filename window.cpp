@@ -248,3 +248,32 @@ void Window::toggle_fullscreen() {
 
     window_in_fullscreen = !window_in_fullscreen; // Toggle fullscreen state
 }
+
+void Window::enable_fullscreen() {
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+    // Get the current window's position and size
+    int window_x, window_y, window_width, window_height;
+    glfwGetWindowPos(glfw_window, &window_x, &window_y);
+    glfwGetWindowSize(glfw_window, &window_width, &window_height);
+
+    // If the window is not fullscreen, switch to fullscreen mode
+    glfwSetWindowMonitor(glfw_window, monitor, 0, 0, window_width, window_height, mode->refreshRate);
+
+    window_in_fullscreen = true;
+}
+
+void Window::disable_fullscreen() {
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+    // Get the current window's position and size
+    int window_x, window_y, window_width, window_height;
+    glfwGetWindowPos(glfw_window, &window_x, &window_y);
+    glfwGetWindowSize(glfw_window, &window_width, &window_height);
+
+    glfwSetWindowMonitor(glfw_window, nullptr, window_x, window_y, window_width, window_height, 0);
+
+    window_in_fullscreen = false; // Toggle fullscreen state
+}
