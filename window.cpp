@@ -1,7 +1,10 @@
 #include "window.hpp"
 #include <iostream>
+#include <optional>
 #include <ostream>
 #include <stdexcept>
+#include <unordered_set>
+#include <vector>
 
 static void error_callback(int error, const char *description);
 
@@ -274,4 +277,101 @@ void Window::disable_fullscreen() {
                          height_px, 0);
 
     window_in_fullscreen = false; // Toggle fullscreen state
+}
+
+#include <sstream>
+
+std::optional<std::pair<int, int>> parse_aspect_ratio(const std::string &aspect_ratio) {
+    std::istringstream ss(aspect_ratio);
+    int w, h;
+    char sep;
+    if (ss >> w >> sep >> h && sep == ':' && h != 0) {
+        return std::make_pair(w, h);
+    }
+    return std::nullopt;
+}
+
+std::vector<VideoMode> get_available_video_modes(GLFWmonitor *monitor,
+                                                 const std::optional<std::string> &aspect_ratio = std::nullopt) {
+    std::vector<VideoMode> modes_out;
+
+    if (!monitor) {
+        std::cerr << "Invalid monitor pointer.\n";
+        return modes_out;
+    }
+
+    std::optional<std::pair<int, int>> parsed_ratio;
+    if (aspect_ratio) {
+        parsed_ratio = parse_aspect_ratio(*aspect_ratio);
+    }
+
+    int count;
+    const GLFWvidmode *modes = glfwGetVideoModes(monitor, &count);
+
+    for (int i = 0; i < count; ++i) {
+        int width = modes[i].width;
+        int height = modes[i].height;
+
+        // If filtering by aspect ratio
+        if (parsed_ratio) {
+            const auto &[target_w, target_h] = *parsed_ratio;
+            if (width * target_h != height * target_w) {
+                continue;
+            }
+        }
+
+        modes_out.push_back({width, height, modes[i].refreshRate});
+    }
+
+    return modes_out;
+}
+
+std::vector<std::string> video_modes_to_resolutions(const std::vector<VideoMode> &video_modes) {
+    std::vector<std::string> resolutions;
+    std::unordered_set<std::string> seen;
+
+    for (const auto &mode : video_modes) {
+        std::string res = std::to_string(mode.width) + "x" + std::to_string(mode.height);
+        if (seen.insert(res).second) {
+            resolutions.push_back(res);
+        }
+    }
+
+    return resolutions;
+}
+
+std::vector<std::string> get_available_resolutions(const std::optional<std::string> &aspect_ratio) {
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    if (!monitor) {
+        std::cerr << "Failed to get primary monitor.\n";
+        return {};
+    }
+
+    auto filtered_modes = get_available_video_modes(monitor, aspect_ratio);
+    return video_modes_to_resolutions(filtered_modes);
+}
+
+void Window::set_resolution(const std::string &resolution) {
+    size_t x_pos = resolution.find('x');
+    unsigned int width, height;
+    if (x_pos != std::string::npos) {
+        width = std::stoi(resolution.substr(0, x_pos));
+        height = std::stoi(resolution.substr(x_pos + 1));
+        width_px = width;
+        height_px = height;
+        glfwSetWindowSize(glfw_window, width, height);
+    } else {
+        throw std::invalid_argument("Input string is not in the correct format (e.g. 1280x960)");
+    }
+}
+
+void Window::set_fullscreen_by_on_off(const std::string &on_off_string) {
+    // TODO: if value is on / off we call window.enable/disable_fullscreen accordingly.
+    if (on_off_string == "on") {
+        enable_fullscreen();
+    } else if (on_off_string == "off") {
+        disable_fullscreen();
+    } else {
+        std::cout << "Invalid value for fullscreen: {}" << on_off_string << std::endl;
+    }
 }
