@@ -33,6 +33,12 @@ class Window {
     GLFWwindow *glfw_window;
     void print_opengl_info();
     void toggle_mouse_mode();
+    void disable_cursor();
+    void enable_cursor();
+
+    // these functions only exist so I don't have to rember the opengl api for this
+    void enable_wireframe_mode();
+    void disable_wireframe_mode();
 
     void set_resolution(const std::string &resolution);
 
@@ -41,7 +47,7 @@ class Window {
     void disable_fullscreen();
     void set_fullscreen_by_on_off(const std::string &on_off_string);
 
-    bool cursor_is_grabbed = false;
+    bool cursor_is_disabled = false;
     bool window_in_fullscreen = false;
 };
 

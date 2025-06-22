@@ -12,7 +12,7 @@ Window::Window(unsigned int width_px, unsigned int height_px, const char *window
                bool start_with_mouse_captured, bool vsync, bool print_out_opengl_data)
     : width_px(width_px), height_px(height_px) {
 
-    cursor_is_grabbed = start_with_mouse_captured;
+    cursor_is_disabled = start_with_mouse_captured;
 
     glfwSetErrorCallback(error_callback);
 
@@ -223,13 +223,25 @@ void Window::print_opengl_info() {
 static void error_callback(int error, const char *description) { fprintf(stderr, "Error: %s\n", description); }
 
 void Window::toggle_mouse_mode() {
-    if (cursor_is_grabbed) {
+    if (cursor_is_disabled) {
         glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
     } else {
         glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
-    cursor_is_grabbed = !cursor_is_grabbed;
+    cursor_is_disabled = !cursor_is_disabled;
 }
+
+void Window::disable_cursor() {
+    glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    cursor_is_disabled = true;
+}
+void Window::enable_cursor() {
+    glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    cursor_is_disabled = false;
+}
+
+void Window::enable_wireframe_mode() { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
+void Window::disable_wireframe_mode() { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 
 void Window::toggle_fullscreen() {
     GLFWmonitor *monitor = glfwGetPrimaryMonitor();
