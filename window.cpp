@@ -8,7 +8,7 @@
 
 static void error_callback(int error, const char *description);
 
-Window::Window(unsigned int width_px, unsigned int height_px, const char *window_name, bool start_in_fullscreen,
+Window::Window(unsigned int width_px, unsigned int height_px, const std::string &window_name, bool start_in_fullscreen,
                bool start_with_mouse_captured, bool vsync, bool print_out_opengl_data)
     : width_px(width_px), height_px(height_px) {
 
@@ -28,9 +28,9 @@ Window::Window(unsigned int width_px, unsigned int height_px, const char *window
         const GLFWvidmode *mode = glfwGetVideoMode(monitor);
         width_px = mode->width;
         height_px = mode->height;
-        glfw_window = glfwCreateWindow(width_px, height_px, window_name, monitor, NULL);
+        glfw_window = glfwCreateWindow(width_px, height_px, window_name.c_str(), monitor, NULL);
     } else {
-        glfw_window = glfwCreateWindow(width_px, height_px, window_name, NULL, NULL);
+        glfw_window = glfwCreateWindow(width_px, height_px, window_name.c_str(), NULL, NULL);
     }
 
     if (glfw_window == nullptr) {
@@ -79,6 +79,8 @@ Window::Window(unsigned int width_px, unsigned int height_px, const char *window
         // logger.info("raw mouse motion supported, using it");
         glfwSetInputMode(glfw_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
+
+    logger.info("window has been successfully initialized");
 }
 
 // the window manges the glfw lifetime, also since we initialize window first before operating with opengl it is
