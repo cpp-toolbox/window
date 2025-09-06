@@ -25,7 +25,7 @@ std::vector<std::string> get_available_resolutions(const std::optional<std::stri
 
 class Window {
   private:
-    ConsoleLogger logger;
+    Logger logger{"window"};
 
   public:
     unsigned int width_px, height_px;
