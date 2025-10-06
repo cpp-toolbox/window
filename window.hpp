@@ -52,6 +52,19 @@ class Window {
     void disable_fullscreen();
     void set_fullscreen_by_on_off(const std::string &on_off_string);
 
+    std::function<void(double)> wrap_tick_with_required_glfw_calls(std::function<void(double)> tick) {
+        return [tick, this](double dt) {
+            // clear buffers before tick
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+            tick(dt);
+
+            // swap and poll after tick
+            glfwSwapBuffers(glfw_window);
+            glfwPollEvents();
+        };
+    }
+
     bool cursor_is_disabled = false;
     bool window_in_fullscreen = false;
 };
