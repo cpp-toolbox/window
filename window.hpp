@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <numeric>
 #include <optional>
 #include <ostream>
 #include <vector>
@@ -53,6 +54,21 @@ class Window {
     void enable_fullscreen();
     void disable_fullscreen();
     void set_fullscreen_by_on_off(const std::string &on_off_string);
+
+    std::tuple<unsigned int, unsigned int> reduce_ratio(std::tuple<unsigned int, unsigned int> ratio) {
+        auto [num, den] = ratio;
+        if (den == 0) {
+            // Handle division by zero gracefully (you can also throw an exception)
+            return {0, 0};
+        }
+
+        unsigned int g = std::gcd(num, den);
+        return {num / g, den / g};
+    }
+
+    std::tuple<unsigned int, unsigned int> get_aspect_ratio_in_simplest_terms() {
+        return reduce_ratio({this->width_px, this->height_px});
+    }
 
     std::function<void(double)> wrap_tick_with_required_glfw_calls(std::function<void(double)> tick) {
         return [tick, this](double dt) {
