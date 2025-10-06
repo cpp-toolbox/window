@@ -41,6 +41,8 @@ class Window {
     void disable_cursor();
     void enable_cursor();
 
+    bool window_should_close() { return glfwWindowShouldClose(glfw_window); }
+
     // these functions only exist so I don't have to rember the opengl api for this
     void enable_wireframe_mode();
     void disable_wireframe_mode();
