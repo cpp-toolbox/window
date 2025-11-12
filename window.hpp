@@ -41,6 +41,35 @@ class Window {
     void toggle_mouse_mode();
     void disable_cursor();
     void enable_cursor();
+    void set_cursor_pos(double xpos, double ypos);
+
+    /*
+     * @note 2d screen space  (2d-ss) is defined as the coordinate system where the top left of the screen is (0, 0)
+     * and the bottom right is (width_px, height_px) where those values is the pixel count of your monitor. Note that
+     * even though the pixel count is always an integer, positions in 2d-ss might not be, for example you could be at
+     * the position (5.2, 8.9)
+     *
+     * @note 2d normalized screen space (2d-nss) is defined as the coordinate system where the middle of the screen is
+     * (0, 0), top right edge is given by (1, 1), and the bottom left edge is (-1, 1), this means that the screen's
+     * coordinates are bounded with in a 2x2 square
+     *
+     * @note By default 2d-nss causes stretching because the physical screen is not actually a square and is instead a
+     * rectangle, but the pixels on the screen are still squares, causing the pixel count on each axis to be different.
+     * In order to correct for this problem one of the axes needs to be scaled to correct for this. By default on an
+     * 16:9 monitor running 1920x1080 since the width is greater than the height, then we have to scale down x axis
+     * so that stretching does not occur. This new space is a space where exactly one of the axis ranges from -1 to 1,
+     * and the other one ranges from -a to a where a is the scaling factor applied to fix the stretching. We call this
+     * new space aspect corrected 2d-nss or 2d-acnss
+     *
+     * @note This function is mainly used on mouse positions as they are measured in 2d-ss
+     *
+     */
+
+    std::tuple<double, double> convert_point_from_2d_screen_space_to_2d_normalized_screen_space(double x, double y);
+
+    std::tuple<double, double> get_corrective_aspect_ratio_scale();
+    std::tuple<double, double>
+    convert_point_from_2d_screen_space_to_2d_aspect_corrected_normalized_screen_space(double x, double y);
 
     bool window_should_close() { return glfwWindowShouldClose(glfw_window); }
 

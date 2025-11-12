@@ -242,6 +242,36 @@ void Window::enable_cursor() {
     cursor_is_disabled = false;
 }
 
+void Window::set_cursor_pos(double xpos, double ypos) { glfwSetCursorPos(glfw_window, 400.0, 300.0); }
+
+std::tuple<double, double> Window::convert_point_from_2d_screen_space_to_2d_normalized_screen_space(double x,
+                                                                                                    double y) {
+    int width, height;
+    glfwGetWindowSize(glfw_window, &width, &height);
+    return {(2.0f * x) / width - 1.0f, 1.0f - (2.0f * y) / height};
+}
+
+std::tuple<double, double> Window::get_corrective_aspect_ratio_scale() {
+    auto [aspect_ratio_x, aspect_ratio_y] = get_aspect_ratio_in_simplest_terms();
+    float aspect = static_cast<float>(aspect_ratio_x) / static_cast<float>(aspect_ratio_y);
+    double x_scale = 1, y_scale = 1;
+    if (aspect > 1.0f) {
+        // wider: shader shrinks x => visible area extends further in x
+        x_scale = aspect;
+    } else {
+        // taller: shader shrinks y => visible area extends further in y
+        y_scale = 1 / aspect;
+    }
+    return {x_scale, y_scale};
+}
+
+std::tuple<double, double>
+Window::convert_point_from_2d_screen_space_to_2d_aspect_corrected_normalized_screen_space(double x, double y) {
+    auto [nssx, nssy] = convert_point_from_2d_screen_space_to_2d_normalized_screen_space(x, y);
+    auto [carsx, carsy] = get_corrective_aspect_ratio_scale();
+    return {nssx * carsx, nssy * carsy};
+}
+
 void Window::enable_wireframe_mode() { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 void Window::disable_wireframe_mode() { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 
