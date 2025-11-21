@@ -102,6 +102,7 @@ class Window {
     std::function<void(double)> wrap_tick_with_required_glfw_calls(std::function<void(double)> tick) {
         return [tick, this](double dt) {
             // clear buffers before tick
+            // NOTE: in the future the user can specify what they want to clear.
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
             tick(dt);
