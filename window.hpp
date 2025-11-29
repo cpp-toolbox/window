@@ -102,7 +102,7 @@ class Window {
     std::function<void(double)> wrap_tick_with_required_glfw_calls(std::function<void(double)> tick) {
         return [tick, this](double dt) {
             {
-                LogSection _(global_logger, "gl clear", false);
+                LogSection _(*global_logger, "gl clear", false);
                 // clear buffers before tick
                 // NOTE: in the future the user can specify what they want to clear.
                 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -111,14 +111,14 @@ class Window {
             tick(dt);
 
             {
-                LogSection _(global_logger, "gl swap buffer and poll events", false);
+                LogSection _(*global_logger, "gl swap buffer and poll events", false);
                 // swap and poll after tick
                 {
-                    LogSection _(global_logger, "swap buffers");
+                    LogSection _(*global_logger, "swap buffers");
                     glfwSwapBuffers(glfw_window);
                 }
                 {
-                    LogSection _(global_logger, "poll events");
+                    LogSection _(*global_logger, "poll events");
                     glfwPollEvents();
                 }
             }
