@@ -275,6 +275,13 @@ Window::convert_point_from_2d_screen_space_to_2d_aspect_corrected_normalized_scr
 void Window::enable_wireframe_mode() { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); }
 void Window::disable_wireframe_mode() { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); }
 
+void Window::enable_backface_culling() {
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
+}
+
+void Window::disable_backface_culling() { glDisable(GL_CULL_FACE); }
+
 void Window::toggle_fullscreen() {
     GLFWmonitor *monitor = glfwGetPrimaryMonitor();
     const GLFWvidmode *mode = glfwGetVideoMode(monitor);

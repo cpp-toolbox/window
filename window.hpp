@@ -77,6 +77,9 @@ class Window {
     void enable_wireframe_mode();
     void disable_wireframe_mode();
 
+    void enable_backface_culling();
+    void disable_backface_culling();
+
     void set_resolution(const std::string &resolution);
 
     void toggle_fullscreen();
@@ -99,29 +102,35 @@ class Window {
         return reduce_ratio({this->width_px, this->height_px});
     }
 
+    void start_of_tick_glfw_logic() {
+        {
+            LogSection _(*global_logger, "gl clear", false);
+            // clear buffers before tick
+            // NOTE: in the future the user can specify what they want to clear.
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        }
+    }
+
+    void end_of_tick_glfw_logic() {
+        {
+            LogSection _(*global_logger, "gl swap buffer and poll events", false);
+            // swap and poll after tick
+            {
+                LogSection _(*global_logger, "swap buffers");
+                glfwSwapBuffers(glfw_window);
+            }
+            {
+                LogSection _(*global_logger, "poll events");
+                glfwPollEvents();
+            }
+        }
+    }
+
     std::function<void(double)> wrap_tick_with_required_glfw_calls(std::function<void(double)> tick) {
         return [tick, this](double dt) {
-            {
-                LogSection _(*global_logger, "gl clear", false);
-                // clear buffers before tick
-                // NOTE: in the future the user can specify what they want to clear.
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            }
-
+            start_of_tick_glfw_logic();
             tick(dt);
-
-            {
-                LogSection _(*global_logger, "gl swap buffer and poll events", false);
-                // swap and poll after tick
-                {
-                    LogSection _(*global_logger, "swap buffers");
-                    glfwSwapBuffers(glfw_window);
-                }
-                {
-                    LogSection _(*global_logger, "poll events");
-                    glfwPollEvents();
-                }
-            }
+            end_of_tick_glfw_logic();
         };
     }
 
