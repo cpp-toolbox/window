@@ -104,7 +104,7 @@ class Window {
 
     void start_of_tick_glfw_logic() {
         {
-            LogSection _(*global_logger, "gl clear", false);
+            LogSection _(*global_logger, "gl clear", LogSection::LogMode::disable);
             // clear buffers before tick
             // NOTE: in the future the user can specify what they want to clear.
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -113,7 +113,7 @@ class Window {
 
     void end_of_tick_glfw_logic() {
         {
-            LogSection _(*global_logger, "gl swap buffer and poll events", false);
+            LogSection _(*global_logger, "gl swap buffer and poll events", LogSection::LogMode::disable);
             // swap and poll after tick
             {
                 LogSection _(*global_logger, "swap buffers");
