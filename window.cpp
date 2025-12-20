@@ -1,4 +1,5 @@
 #include "window.hpp"
+#include <GLFW/glfw3.h>
 #include <iostream>
 #include <optional>
 #include <ostream>
@@ -11,6 +12,7 @@ static void error_callback(int error, const char *description);
 Window::Window(unsigned int width_px, unsigned int height_px, const std::string &window_name, bool start_in_fullscreen,
                bool start_with_mouse_captured, bool vsync, bool print_out_opengl_data)
     : width_px(width_px), height_px(height_px) {
+    GlobalLogSection _("window constructor");
 
     cursor_is_disabled = start_with_mouse_captured;
 
@@ -18,6 +20,8 @@ Window::Window(unsigned int width_px, unsigned int height_px, const std::string 
 
     if (!glfwInit()) {
         throw std::runtime_error("glfw couldn't be initialized");
+    } else {
+        global_logger->info("glfw successfully initialized");
     }
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
@@ -37,6 +41,8 @@ Window::Window(unsigned int width_px, unsigned int height_px, const std::string 
         std::cout << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
         throw std::runtime_error("failed to create window");
+    } else {
+        global_logger->info("successfully created glfw window, making that the current context now");
     }
 
     glfwMakeContextCurrent(glfw_window);
@@ -54,6 +60,8 @@ Window::Window(unsigned int width_px, unsigned int height_px, const std::string 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cout << "Failed to initialize GLAD" << std::endl;
         throw std::runtime_error("failed to initialize GLAD");
+    } else {
+        global_logger->info("GLAD successfully loaded");
     }
 
     if (print_out_opengl_data) {
@@ -62,25 +70,28 @@ Window::Window(unsigned int width_px, unsigned int height_px, const std::string 
 
     // disable this for debugging so you can move the mouse outside the window
     if (start_with_mouse_captured) {
+        global_logger->info("disabling cursor");
         glfwSetInputMode(glfw_window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
     bool rendering_3d_graphics = true;
 
     if (rendering_3d_graphics) {
+        global_logger->info("enabling depth test");
         glEnable(GL_DEPTH_TEST); // configure global opengl state
     }
 
     int vsync_int = vsync;
 
+    global_logger->info("just set vsync to value: {}", vsync_int);
     glfwSwapInterval(vsync_int);
 
     if (glfwRawMouseMotionSupported()) {
-        // logger.info("raw mouse motion supported, using it");
+        global_logger->info("raw mouse motion supported, using it");
         glfwSetInputMode(glfw_window, GLFW_RAW_MOUSE_MOTION, GLFW_TRUE);
     }
 
-    logger.info("window has been successfully initialized");
+    global_logger->info("window has been successfully initialized");
 }
 
 // the window manges the glfw lifetime, also since we initialize window first before operating with opengl it is
@@ -402,6 +413,84 @@ std::vector<std::string> get_available_resolutions(const std::optional<std::stri
     return video_modes_to_resolutions(filtered_modes);
 }
 
+// should we return optional in the future?
+GLFWmonitor *Window::get_monitor_window_is_currently_on() {
+    if (!glfw_window)
+        return glfwGetPrimaryMonitor();
+
+    int wx, wy;
+    glfwGetWindowPos(glfw_window, &wx, &wy);
+
+    int monitor_count;
+    GLFWmonitor **monitors = glfwGetMonitors(&monitor_count);
+
+    for (int i = 0; i < monitor_count; ++i) {
+        int mx, my;
+        glfwGetMonitorPos(monitors[i], &mx, &my);
+
+        const GLFWvidmode *mode = glfwGetVideoMode(monitors[i]);
+        if (wx >= mx && wx < mx + mode->width && wy >= my && wy < my + mode->height) {
+            return monitors[i];
+        }
+    }
+
+    // fallback
+    return glfwGetPrimaryMonitor();
+}
+
+void Window::move_top_left_of_window_to(int x, int y) {
+    if (!glfw_window)
+        return;
+
+    // NOTE: these are in virtual screen space, monitors are just things which increase the virtual screen space and
+    // are just aabb's that partition the space, here we're obtaining the coordinates of the top left window in
+    // virtual screen space which must be within one of the aabbs.
+    int wx, wy;
+    glfwGetWindowPos(glfw_window, &wx, &wy);
+
+    GLFWmonitor *monitor_window_is_on = get_monitor_window_is_currently_on();
+
+    // move window to top-left of that monitor
+    int monitor_x, monitor_y;
+    glfwGetMonitorPos(monitor_window_is_on, &monitor_x, &monitor_y);
+    glfwSetWindowPos(glfw_window, monitor_x + x, monitor_y + y);
+}
+
+void Window::move_center_of_window_to(int x, int y) {
+    if (!glfw_window)
+        return;
+
+    int window_width, window_height;
+    glfwGetWindowSize(glfw_window, &window_width, &window_height);
+
+    int top_left_x = x - window_width / 2;
+    int top_left_y = y - window_height / 2;
+
+    move_top_left_of_window_to(top_left_x, top_left_y);
+}
+
+/// input x and y are in 2d-nss
+void Window::move_center_of_window_to_normalized(double nx, double ny) {
+    if (!glfw_window)
+        return;
+
+    math_utils::clamp<double>(nx, -1, 1);
+    math_utils::clamp<double>(ny, -1, 1);
+
+    // get the monitor the window is on
+    GLFWmonitor *monitor = get_monitor_window_is_currently_on();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+    int monitor_width = mode->width;
+    int monitor_height = mode->height;
+
+    // convert normalized coordinates [-1,1] to pixel coordinates relative to monitor
+    int px = static_cast<int>((nx + 1.0) * 0.5 * monitor_width);
+    // note: glfw y=0 is top, so we flip the y-axis
+    int py = static_cast<int>((1.0 - (ny + 1.0) * 0.5) * monitor_height);
+
+    move_center_of_window_to(px, py);
+}
+
 void Window::set_resolution(const std::string &resolution) {
     size_t x_pos = resolution.find('x');
     unsigned int width, height;
@@ -414,6 +503,17 @@ void Window::set_resolution(const std::string &resolution) {
     } else {
         throw std::invalid_argument("Input string is not in the correct format (e.g. 1280x960)");
     }
+}
+
+/// assumes window has been initialized
+std::tuple<int, int> Window::get_monitor_resolution() {
+    GLFWmonitor *monitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode *mode = glfwGetVideoMode(monitor);
+
+    int width = mode->width;
+    int height = mode->height;
+
+    return {width, height};
 }
 
 void Window::set_fullscreen_by_on_off(const std::string &on_off_string) {

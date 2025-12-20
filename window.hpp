@@ -26,8 +26,6 @@ std::vector<std::string> get_available_resolutions(const std::optional<std::stri
 
 class Window {
   private:
-    Logger logger{"window"};
-
   public:
     unsigned int width_px, height_px;
     int top_left_corner_of_window_x, top_left_corner_of_window_y;
@@ -80,7 +78,14 @@ class Window {
     void enable_backface_culling();
     void disable_backface_culling();
 
+    GLFWmonitor *get_monitor_window_is_currently_on();
+
+    void move_top_left_of_window_to(int x, int y);
+    void move_center_of_window_to(int x, int y);
+    void move_center_of_window_to_normalized(double nx, double ny);
+
     void set_resolution(const std::string &resolution);
+    std::tuple<int, int> get_monitor_resolution();
 
     void toggle_fullscreen();
     void enable_fullscreen();
